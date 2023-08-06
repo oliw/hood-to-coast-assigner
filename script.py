@@ -1,5 +1,6 @@
 from ortools.sat.python import cp_model
 from prettytable import PrettyTable
+import csv
 from course_data import LEGS, SHIFTS
 
 def legs_of_top_n_easiest_shifts(n):
@@ -221,8 +222,11 @@ else:
 # sort assignments by shift number
 assignments.sort(key=lambda x: x.shift["number"])
 
+headers = ["Shift number", "Van", "Suggested Person", "Difficulty (1-hardest)", "Legs", "Prefs", "Respected Prefs?", "Leg remarks"]
+rows = []
+
 # print assignments as a table with shift number, van number, and person name
-t = PrettyTable(['Shift number', 'Van', 'Suggested Person', 'Difficulty (1-hardest)','Legs', 'Prefs', 'Respected Prefs?', 'Leg remarks'], align="l", max_width=50)
+
 for assignment in assignments:
     shift = assignment.shift
     person = assignment.person
@@ -244,9 +248,9 @@ for assignment in assignments:
         else:
             leg_remark = f'{leg}-({leg_info["Miles"]})-{leg_info["Remarks"]}'
             leg_remarks.append(leg_remark)
-    leg_remarks = '\n'.join(leg_remarks)
+    leg_remarks
 
-    t.add_row([
+    rows.append([
         shift["number"], 
         shift["van"], 
         person["name"], 
@@ -257,7 +261,18 @@ for assignment in assignments:
         leg_remarks
     ])
 
+t = PrettyTable(headers, align="l", max_width=50)
+for row in rows:
+    t.add_row(row)
 print(t)
+
+# output to csv
+with open('output.csv', mode="w") as csvfile:
+    writer = csv.writer(csvfile, delimiter="\t")
+    writer.writerow(headers)
+    for row in rows:
+        writer.writerow(row)
+    
 
 # convert a shifts leg into a comma seperated string
 def leg_to_string(leg):
